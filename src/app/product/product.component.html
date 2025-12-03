@@ -1,0 +1,27 @@
+<div class="products-container">
+  <div class="filter-section">
+    <h2>Filtrer par catégorie</h2>
+    <div class="filter-controls">
+      <button 
+        class="filter-btn" 
+        [class.active]="selectedCategory === ''"
+        (click)="selectedCategory = ''">
+        Tous les produits
+      </button>
+      <button 
+        *ngFor="let cat of categories" 
+        class="filter-btn"
+        [class.active]="selectedCategory === cat"
+        (click)="selectedCategory = cat">
+        {{ cat }}
+      </button>
+    </div>
+  </div>
+
+  <div class="products-list">
+    <app-product-card 
+      *ngFor="let product of filteredProducts" 
+      [product]="product">
+    </app-product-card>
+  </div>
+</div>

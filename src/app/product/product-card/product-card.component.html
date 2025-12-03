@@ -1,0 +1,35 @@
+<ng-container class="container" *ngIf="product">
+  <mat-card class="product-card">
+    <mat-card-header>
+      <mat-card-title>{{ product.productName || "sans nom" }}</mat-card-title>
+      <mat-card-subtitle>{{ product.category }}</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content class="mt15">
+      <p *ngIf="availableQuantity > 0" [ngClass]="{'low-stock': availableQuantity <= 3}">
+        Qté disponible: <strong>{{ availableQuantity }}</strong>
+      </p>
+      <p *ngIf="availableQuantity <= 0" class="out-of-stock">Out of stock</p>
+      <p>Prix: {{ product.price | currency:'EUR':'symbol':'1.2-2' }}</p>
+      <p>Prix TTC: {{ getPriceTTC(product) | currency:'EUR':'symbol':'1.2-2' }}</p>
+      
+      <div *ngIf="errorMessage" class="error-message">
+        {{ errorMessage }}
+      </div>
+    </mat-card-content>
+
+    <mat-card-actions class="mt15">
+      <div class="quantity-control">
+        <button mat-icon-button (click)="decreaseQty()" [disabled]="quantity <= 1">-</button>
+        <span class="quantity-display">{{ quantity }}</span>
+        <button mat-icon-button (click)="increaseQty()" [disabled]="availableQuantity <= 0">+</button>
+      </div>
+      
+      <button mat-raised-button class="add-btn" 
+        [disabled]="availableQuantity <= 0"
+        (click)="addToCart()">
+        Ajouter
+      </button>
+    </mat-card-actions>
+  </mat-card>
+</ng-container>

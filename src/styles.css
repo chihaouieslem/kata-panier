@@ -1,0 +1,81 @@
+
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+.add-btn {
+  background-color: #388e3c;
+  color: white;
+  border: none;
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+  border-radius: 4px;
+}
+.mdc-text-field--filled:not(.mdc-text-field--disabled) {
+  background-color: #888888 !important;
+  border-radius: 6px !important;
+}
+
+.mat-mdc-option.mat-mdc-selected,
+.mat-mdc-option.mat-mdc-selected:hover {
+  color: black !important;
+  background-color: transparent !important;
+}
+
+
+.mat-mdc-option:hover:not(.mat-mdc-selected) {
+  background-color: #f0f0f0 !important; 
+  color: black !important;
+}
+
+/* Couleur de la coche */
+.mat-mdc-pseudo-checkbox-checked {
+  border-color: black !important;
+  background-color: black !important;
+}
+
+
+.mdc-select__dropdown-icon {
+  color: black !important;
+  fill: black !important;
+}
+
+.mat-mdc-form-field.mat-focused.mat-primary .mat-mdc-select-arrow {
+  color: black !important;
+  fill: black !important;
+}
+
+
+.cart-button {
+text-decoration: solid;
+text-decoration-line: underline;
+border-color: blue;
+color: blue;
+height: 50px;
+width: 150px;
+background-color: white;
+}
+
+.filter-cart-container {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.btn-like-select {
+  flex-grow: 1;
+  max-width: 300px;
+}
+.product-card {
+  max-width: 300px;
+  margin: 1rem;
+}
+
+.product-card img {
+  height: 200px;
+  object-fit: cover;
+}
+
+.out-of-stock {
+  color: red;
+  font-weight: bold;
+}

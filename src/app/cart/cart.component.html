@@ -1,0 +1,75 @@
+<div class="cart-container">
+  <h1>Panier</h1>
+
+  <div *ngIf="errorMessage" class="error-banner">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="cartItems.length === 0" class="empty-cart">
+    <p>Votre panier est vide</p>
+    <button class="btn-continue" routerLink="/products">← Retourner aux produits</button>
+  </div>
+
+  <div *ngIf="cartItems.length > 0" class="cart-content">
+    <table class="cart-table">
+      <thead>
+        <tr>
+          <th>Produit</th>
+          <th>Catégorie</th>
+          <th>Prix unitaire HT</th>
+          <th>Quantité</th>
+          <th>Taxes </th>
+          <th>Prix unitaire TTC</th>
+          <th>Total TTC</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of cartItems" class="cart-item">
+          <td>{{ item.product.productName }}</td>
+          <td>{{ item.product.category }}</td>
+          <td>{{ item.product.price | number:'1.2-2' }} €</td>
+          <td>
+            <input 
+              type="number" 
+              min="1" 
+              [max]="item.product.quantity + item.quantity"
+              [value]="item.quantity"
+              (change)="updateQuantity(item.product.id, $any($event.target).value)"
+              class="qty-input">
+          </td>
+          <td class="tax">{{ getTaxPerItem(item) | number:'1.2-2' }} €</td>
+          <td>{{ item.priceTTC | number:'1.2-2' }} €</td>
+          <td>{{ (item.priceTTC * item.quantity) | number:'1.2-2' }} €</td>
+          <td><button class="btn-remove" (click)="removeItem(item.product.id)">Supprimer</button></td>
+          
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="cart-summary">
+      <div class="summary-row">
+        <span>Sous-total:</span>
+        <span>{{ getSubtotal() | number:'1.2-2' }} €</span>
+      </div>
+      <div class="summary-row">
+        <span>Taxes (TVA + Frais d'import):</span>
+        <span>{{ totalTax | number:'1.2-2' }} €</span>
+      </div>
+      <div class="summary-row total">
+        <span>Total TTC:</span>
+        <span>{{ cartTotal | number:'1.2-2' }} €</span>
+      </div>
+    </div>
+
+    <div class="cart-actions">
+      <button class="btn-continue" routerLink="/products">← Continuer les achats</button>
+      <button class="btn-clear" (click)="clearCart()">Vider le panier</button>
+      <button class="btn-checkout">Passer la commande</button>
+    </div>
+
+    <footer class="app-footer">
+      Made with ❤ by Islem
+    </footer>
+  </div>
+</div>

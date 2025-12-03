@@ -1,0 +1,15 @@
+<div class="app-container">
+  <nav class="navbar">
+    <div class="navbar-content">
+      <h1 class="logo">Kata Panier</h1>
+      <button class="btn-cart" (click)="goToCart()">
+        🛒 Panier
+        <span class="cart-badge" *ngIf="cartCount > 0">{{ cartCount }}</span>
+      </button>
+    </div>
+  </nav>
+
+  <main class="main-content">
+    <router-outlet></router-outlet>
+  </main>
+</div>
