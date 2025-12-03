@@ -1,8 +1,8 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { ProductModel } from '../../model/product-model';
-import { Category } from '../../shared/enums/category';
-import { CartService } from '../../shared/services/cart.service';
-import { StockService } from '../../shared/services/stock.service';
+import { ProductModel } from '../../../model/product-model';
+import { Category } from '../../../shared/enums/category';
+import { CartService } from '../../../shared/services/cart.service';
+import { StockService } from '../../../shared/services/stock.service';
 
 @Component({
   selector: 'app-product-card',
