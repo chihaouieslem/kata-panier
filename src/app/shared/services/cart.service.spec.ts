@@ -1,62 +1,153 @@
+import { TestBed } from '@angular/core/testing';
 import { CartService } from './cart.service';
 import { StockService } from './stock.service';
 import { ProductModel } from '../../model/product-model';
 import { Category } from '../enums/category';
 
 describe('CartService', () => {
-  let cartService: CartService;
-  let stockService: StockService;
+  let service: CartService;
+  let stockService: jasmine.SpyObj<StockService>;
+
   const product: ProductModel = {
     id: 1,
-    productName: 'Test',
+    productName: 'Livre',
     price: 10,
-    quantity: 5,
-    isImported: false,
-    category: Category.Food,
-    isEssentialGoods: true
+    quantity: 10,
+    isEssentialGoods: false,
+    category: Category.Books,
+    isImported: false
   };
 
   beforeEach(() => {
-    stockService = new StockService();
-    cartService = new CartService(stockService);
-    stockService.resetStock();
+    const stockSpy = jasmine.createSpyObj('StockService', [
+      'getAvailableQuantity',
+      'reserveStock',
+      'releaseStock'
+    ]);
+
+    TestBed.configureTestingModule({
+      providers: [
+        CartService,
+        { provide: StockService, useValue: stockSpy }
+      ]
+    });
+
+    service = TestBed.inject(CartService);
+    stockService = TestBed.inject(StockService) as jasmine.SpyObj<StockService>;
   });
 
-  it('should add product to cart', () => {
-    const result = cartService.addToCart(product, 2, 12);
-    expect(result).toBeTrue();
-    expect(cartService.getCartCount()).toBe(2);
+
+  it('should allow adding when stock is available', () => {
+    stockService.getAvailableQuantity.and.returnValue(5);
+    expect(service.canAddToCart(1, 3)).toBeTrue();
   });
 
-  it('should not add product if not enough stock', () => {
-    const result = cartService.addToCart(product, 10, 12);
-    expect(result).toBeFalse();
-    expect(cartService.getCartCount()).toBe(0);
+  it('should reject adding when stock is insufficient', () => {
+    stockService.getAvailableQuantity.and.returnValue(1);
+    expect(service.canAddToCart(1, 3)).toBeFalse();
   });
 
-  it('should remove product from cart', () => {
-    cartService.addToCart(product, 2, 12);
-    cartService.removeFromCart(product.id);
-    expect(cartService.getCartCount()).toBe(0);
+
+  it('should add product to cart when stock OK', () => {
+    stockService.getAvailableQuantity.and.returnValue(10);
+    stockService.reserveStock.and.returnValue(true);
+
+    const added = service.addToCart(product, 2, 12);
+
+    expect(added).toBeTrue();
+    expect(service.getCart().length).toBe(1);
+    expect(service.getCart()[0].quantity).toBe(2);
   });
 
-  it('should update quantity in cart', () => {
-    cartService.addToCart(product, 2, 12);
-    const updated = cartService.updateQuantity(product.id, 3);
-    expect(updated).toBeTrue();
-    expect(cartService.getProductQuantityInCart(product.id)).toBe(3);
+  it('should NOT add product when reserveStock fails', () => {
+    stockService.getAvailableQuantity.and.returnValue(10);
+    stockService.reserveStock.and.returnValue(false);
+
+    const added = service.addToCart(product, 2, 12);
+
+    expect(added).toBeFalse();
+    expect(service.getCart().length).toBe(0);
   });
 
-  it('should not update quantity if not enough stock', () => {
-    cartService.addToCart(product, 2, 12);
-    const updated = cartService.updateQuantity(product.id, 10);
-    expect(updated).toBeFalse();
-    expect(cartService.getProductQuantityInCart(product.id)).toBe(2);
+  
+  it('should remove product and release stock', () => {
+    stockService.getAvailableQuantity.and.returnValue(10);
+    stockService.reserveStock.and.returnValue(true);
+
+    service.addToCart(product, 2, 12);
+    service.removeFromCart(1);
+
+    expect(service.getCart().length).toBe(0);
+    expect(stockService.releaseStock).toHaveBeenCalledWith(1, 2);
   });
 
-  it('should clear cart', () => {
-    cartService.addToCart(product, 2, 12);
-    cartService.clearCart();
-    expect(cartService.getCartCount()).toBe(0);
+
+  it('should increase quantity when stock is sufficient', () => {
+    stockService.getAvailableQuantity.and.returnValue(10);
+    stockService.reserveStock.and.returnValue(true);
+
+    service.addToCart(product, 1, 12);
+
+    stockService.getAvailableQuantity.and.returnValue(10);
+    service.updateQuantity(1, 3);
+
+    expect(service.getCart()[0].quantity).toBe(3);
+  });
+
+  it('should decrease quantity and release stock', () => {
+    stockService.getAvailableQuantity.and.returnValue(10);
+    stockService.reserveStock.and.returnValue(true);
+
+    service.addToCart(product, 3, 12);
+    service.updateQuantity(1, 1);
+
+    expect(service.getCart()[0].quantity).toBe(1);
+    expect(stockService.releaseStock).toHaveBeenCalledWith(1, 2);
+  });
+
+  it('should remove product when quantity becomes 0', () => {
+    stockService.getAvailableQuantity.and.returnValue(10);
+    stockService.reserveStock.and.returnValue(true);
+
+    service.addToCart(product, 3, 12);
+
+    service.updateQuantity(1, 0);
+
+    expect(service.getCart().length).toBe(0);
+  });
+
+  it('should return total number of items in cart', () => {
+    stockService.getAvailableQuantity.and.returnValue(10);
+    stockService.reserveStock.and.returnValue(true);
+
+    service.addToCart(product, 2, 12);
+    expect(service.getCartCount()).toBe(2);
+  });
+
+  it('should compute cart total TTC', () => {
+    stockService.getAvailableQuantity.and.returnValue(10);
+    stockService.reserveStock.and.returnValue(true);
+
+    service.addToCart(product, 2, 12);
+    expect(service.getCartTotal()).toBe(24);
+  });
+
+  it('should compute total tax', () => {
+    stockService.getAvailableQuantity.and.returnValue(10);
+    stockService.reserveStock.and.returnValue(true);
+
+    service.addToCart(product, 2, 12); 
+    expect(service.getTotalTax()).toBe(4);
+  });
+
+  it('should clear cart and release all stock', () => {
+    stockService.getAvailableQuantity.and.returnValue(10);
+    stockService.reserveStock.and.returnValue(true);
+
+    service.addToCart(product, 2, 12);
+    service.clearCart();
+
+    expect(service.getCart().length).toBe(0);
+    expect(stockService.releaseStock).toHaveBeenCalledWith(1, 2);
   });
 });

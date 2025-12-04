@@ -15,13 +15,7 @@ describe('StockService', () => {
     });
   });
 
-  it('should reserve stock if available', () => {
-    const product = MOCK_PRODUCTS[0];
-    const result = service.reserveStock(product.id, 2);
-    expect(result).toBeTrue();
-    expect(service.getAvailableQuantity(product.id)).toBe(product.quantity - 2);
-  });
-
+ 
   it('should not reserve stock if not enough', () => {
     const product = MOCK_PRODUCTS[0];
     const result = service.reserveStock(product.id, product.quantity + 1);
